@@ -1,0 +1,156 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+
+#define STACK_CAPA 100      // maximum depth of val stack 
+
+enum { NONE, END_OF_LINE, NUMBER, OPERATOR };
+
+///////////////////////////////////////////////////////////////////////////////
+typedef union data_t data_t;
+union data_t {
+    double value;
+    struct {
+        int oper;       // operator
+        int vs_size;    // value(operand) stack size
+    };
+};
+
+typedef struct stack_t stack_t;
+struct stack_t {
+    int    size;
+    data_t data[STACK_CAPA];
+};
+
+void st_push(stack_t *S, data_t data)
+{
+    if(S->size < STACK_CAPA) {
+        S->data[S->size++] = data;
+    } else {
+        printf("error: stack full\n");
+    }
+}
+
+data_t st_pop(stack_t *S)
+{
+    if(S->size > 0) {
+        return S->data[--S->size];
+    } else {
+        data_t nil = { 0, };
+        printf("error: stack empty\n");
+        return nil;
+    }
+}
+
+data_t st_peek(stack_t *S)
+{
+    if(S->size > 0) {
+        return S->data[S->size - 1];
+    } else {
+        data_t nil = { 0, };
+        printf("error: stack empty\n");
+        return nil;
+    }
+}
+
+int st_size(stack_t *S)
+{
+    return S->size;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool is_oper(int c)
+{
+    switch(c) {
+    case '+': case '-': case '*': case '/': return true;
+    }
+    return false;
+}
+
+int getop(char s[])
+{
+    const char *ops = "+-*/";
+    int c;
+
+    // 공백 스킵
+    do {
+        c = getchar();
+    } while(c == ' ' || c == '\t');
+
+    if(c == EOF) {
+        return EOF;
+    } else if(c == '\n') {
+        return END_OF_LINE;
+    } else if(is_oper(c)) {
+        s[0] = c;
+        return OPERATOR;    /* operator */
+    } else if(isdigit(c)) {
+		int i = 0;
+		s[i++] = c;
+        while(isdigit(c = getchar())) {
+            s[i++] = c;
+        }
+        if(c == '.') {
+            do {
+                s[i++] = c;
+            } while(isdigit(c = getchar()));
+        }
+		s[i] = '\0';
+		if(c != EOF) {
+			ungetc(c, stdin);
+		}
+        return NUMBER;
+    }
+    return NONE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+bool computable(stack_t *oper_st_p, stack_t *value_st_p)
+{
+    // two operands are ready for the size operator
+    if(st_size(oper_st_p) < 1) return false;
+    if(st_size(value_st_p) - st_peek(oper_st_p).vs_size < 2) return false;
+    return true;
+}
+
+int main()
+{
+    stack_t oper_st = { 0, };
+    stack_t numb_st = { 0, };
+    data_t data;
+    double v1, v2;
+    char op;
+    char token[128];
+    int type;
+
+    //while(next operator or operand is not EOF indicator)
+    while((type = getop(token)) != EOF) {
+        if(type == OPERATOR) {                  // if(operator)
+            data.oper = token[0];                   // push it onto operator stack
+            data.vs_size = st_size(&numb_st);       // and remember the operand stack size
+            st_push(&oper_st, data);
+        } else if(type == END_OF_LINE) {        // if(newline)
+            data = st_pop(&numb_st);                // pop and print size of operand stack
+            printf("%f\n", data.value);
+        } else if(type == NUMBER) {             // if(number)
+            data.value = atof(token);
+            st_push(&numb_st, data);                // push it onto operand stack
+            while(computable(&oper_st, &numb_st)) { // while(computable)
+                v2 = st_pop(&numb_st).value;            // pop operands
+                v1 = st_pop(&numb_st).value;
+                op = st_pop(&oper_st).oper;             //  pop operation and do the operation
+                switch(op) {
+                case '+': v1 += v2; break;
+                case '-': v1 -= v2; break;
+                case '*': v1 *= v2; break;
+                case '/': v1 /= v2; break;
+                }
+                data.value = v1;
+                st_push(&numb_st, data);                //  push results onto the operand stack
+            }
+        } else {
+            printf("error\n");
+        }
+    }
+}

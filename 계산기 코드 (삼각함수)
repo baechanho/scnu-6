@@ -3,8 +3,8 @@
 #include <stack>
 #include <fstream>
 #include <ctype.h>
-#include <math.h>
-using namespace std;
+#include <math.h>    
+using namespace std; // 주석 
  
 string const operators = "+-*/";
 string const funcname[] = { "", "sin", "cos", "tan", "sqrt" }; 
@@ -24,7 +24,7 @@ double (*function(const string &s))(double)
 {
     int fn = sizeof(funcname) / sizeof(*funcname);
  
-    for (int i = 1; i < fn; i++) {
+    for (int i = 1; i < fn; i++) { 
         if (funcname[i] == s) {
             return func[i];
         }

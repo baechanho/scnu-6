@@ -1,0 +1,169 @@
+#include <iostream>
+#include <string>
+#include <stack>
+#include <fstream>
+#include <ctype.h>
+#include <math.h>
+using namespace std;
+ 
+string const operators = "+-*/";
+string const funcname[] = { "", "sin", "cos", "tan", "sqrt" }; 
+double (*func[])(double) = { NULL, sin, cos, tan, sqrt };
+ 
+inline bool is_oper(char c)
+{
+    return operators.find(c) != string::npos;
+}
+ 
+inline bool is_number(char c)
+{
+    return 0 <= c && c <= '9';
+}
+ 
+double (*function(const string &s))(double)
+{
+    int fn = sizeof(funcname) / sizeof(*funcname);
+ 
+    for (int i = 1; i < fn; i++) {
+        if (funcname[i] == s) {
+            return func[i];
+        }
+    }
+    return NULL;
+}
+ 
+int prec(char c)
+{
+    switch (c) {
+    case '+':
+    case '-':
+        return 10;
+    case '*':
+    case '/':
+        return 20;
+    case 'm':
+        return 30; // - 부호
+    }
+    return 0;
+}
+ 
+void calc(int oper, stack<double> &numbs)
+{
+    double v2;
+    v2 = numbs.top( );
+    numbs.pop( );
+    if (oper == 'm') {
+        numbs.push(-v2);
+    }
+    else {
+        double v1;
+        v1 = numbs.top( );
+        numbs.pop( );
+        switch (oper) {
+        case '+':
+            numbs.push(v1 + v2);
+            break;
+        case '-':
+            numbs.push(v1 - v2);
+            break;
+        case '*':
+            numbs.push(v1 * v2);
+            break;
+        case '/':
+            if (v2 == 0.) {
+                fprintf(stderr, "ERROR: 0 으로 나눌 수 없습니다.\n");
+            }
+            numbs.push(v1 / v2);
+            break;
+        }
+    }
+}
+ 
+int main(void)
+{
+    string snum = "";
+    stack<double> numbs;
+    stack<char> opers;
+    string expr = "3.75+(7+sin(2.0+3.5/7.0)+2)/(sqrt(2.7)+cos(1.7))";
+    bool signable = true;
+    string id = "";
+    double (*f)(double) = NULL;
+    double v;
+    char op;
+ 
+    while (1) {
+        cout << "수식: ";
+        getline(cin, expr);
+        if (expr == "quit");
+ 
+        for (auto c : expr) {
+            if (isalpha(c)) { // 알파벳이면
+                id += c; // 식별자에 문자 추가
+                continue;
+            } else if (0 < id.length( )) { // 알파벳이 아닌데, 식별자가 있으면
+                f = function(id); // 식별자의 함수를 찾음
+                id.erase( );
+            }
+ 
+            if (isdigit(c) || c == '.') {
+                snum += c;
+            } else {
+                if (0 < snum.length( )) {
+                    v = atof(snum.c_str( ));
+                    numbs.push(v);
+                    snum = "";
+                    signable = false;
+                }
+                if (is_oper(c)) {
+                    if (signable && c == '-') {
+c= 'm';
+signable= false;
+                    } else {
+signable= true;
+                    }
+                    while (!opers.empty( )) {
+op= opers.top( );
+                        if (prec(c) <= prec(op)) {
+opers.pop( );
+calc(op,numbs);
+}else break;
+                    }
+                    opers.push(c);
+                } else if (c == '(') {
+                    opers.push(c);
+                    signable = true;
+                } else if (c == ')') {
+                    while (!opers.empty( )) {
+op= opers.top( );
+                        opers.pop( );
+                        if (op != '(') {
+calc(op,numbs);
+}else break;
+                    }
+                    if (f) { // 괄호가 함수의 인자 리스트이면
+v= numbs.top( ); numbs.pop( ); // 함수의 인자 얻기
+v= f(v); // 함수 호출하여 결과값을 얻음
+numbs.push(v);// 결과 값 푸시
+f= NULL; // 함수 마침
+                    }
+                    signable = false;
+                }
+            }
+        }
+        if (0 < snum.length( )) {
+            v = atof(snum.c_str( ));
+            numbs.push(v);
+        }
+        while (!opers.empty( )) {
+            op = opers.top( );
+            opers.pop( );
+            calc(op, numbs);
+        }
+        v = numbs.top( );
+        numbs.pop( );
+ 
+        cout << "결과: " << expr << " = " << v << "\n\n";
+    }
+ 
+    return 0;
+}

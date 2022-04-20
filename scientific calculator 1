@@ -22,27 +22,3 @@ double  calculation(char*);         // 수식 계산
 void    assignment(char*);          // 대입 연산자 계산
 void    aCommand(char*);            // 배열 변수가 있는 수식 계산
 double  funcArit(int, double);      // 수학 함수 호출
-
-int is_in(char *String, char c)
-// String 에 c 가 있는지 검사
-// 있으면 1, 없으면 0을 리턴
-{
- int i;
- for (i = 0; String[i] != '\0'; ++i)
-
-  if (String[i] == c) return 1;
- return 0;
-}
-
-int whereis(char *String, char *key)
-// String에 key가 있는 위치를 리턴
-// key가 String에 존재하지 않으면 -1을 리턴
-{
- int i, j, flag = 0;
- for (i = 0; String[i] != '\0'; ++i) {
-  for (j = 0; key[j] != '\0' && key[j] == String[i + j]; ++j);
-  if (key[j] == '\0') return i;
- }
-
- return -1;
-}

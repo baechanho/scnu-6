@@ -1,0 +1,48 @@
+double atod(char *String)
+// Ascii to Double
+// ascii 값으로 되어 있는 실수 문자열을 double형으로 반환
+{
+ int dplace = 1;
+ double value = 0;
+
+ while (*String != '\0') {
+  if (*String <= '9' && *String >= '0')
+   if (dplace == 1) value = value * 10 + *String - '0';
+   else {
+    value += (double)(*String - '0') / dplace;
+    dplace *= 10;
+   }
+  else if (*String == '.') dplace *= 10;
+  ++String;
+ }
+ return value;
+}
+
+int main(void)
+{
+ FILE *fp;
+ char buffer[127];
+ int i, j, cnt;
+
+ // 시작
+ printf("Start\n");
+
+ for (i = 0; i < NumofVar; ++i) {
+  flag_v[i] = 0;
+  length_a[i] = 0;
+ }
+
+ while (1) {
+  // 명령어를 입력받음
+  printf("=>");
+  cnt = 0;
+  while (1) {
+   buffer[cnt] = getchar();
+   if (buffer[cnt] == '\n') {
+    buffer[cnt] = '\0';
+    break;
+   }
+   ++cnt;
+  }
+
+  

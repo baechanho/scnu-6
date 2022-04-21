@@ -1,0 +1,62 @@
+I've searched and founded about operator,element and some math functions in calculator, and I think it is necassary elemenet to combine the operation of the device.
+
+
+// 연산자인 경우
+	  else if (is_in("*/+-", expr[i])) {
+	   if (co == cv) {
+	    if (is_in("*/", expr[i]) || prefix != 'd') return 0;
+	    else prefix = expr[i];
+	   }
+	   else {
+	    prefix = 'd';
+	    o[co++] = expr[i];
+	   }
+	  }
+	
+
+	  // 영문자의 경우 다음의 3가지로 나누어진다
+	  else if (expr[i] <= 'Z' && expr[i] >= 'A') {
+	
+
+	   // 일반 변수인 경우
+	   if (expr[i + 1] > 'Z' || expr[i + 1] < 'A') {
+	    if (flag_v[expr[i] - 'A']) {
+	     v[cv++] = table_v[expr[i] - 'A'];
+	     if (prefix == '-') v[cv - 1] = -v[cv - 1];
+	    }
+	    else return 0;
+	   }
+
+
+// 배열의 원소인 경우
+	   else if (expr[i] == expr[i + 1] && expr[i + 2] == '(') {
+	    ar = expr[i];
+	    i += 2;
+	    paren = parenthesis(expr, &i);
+	    if (!(paren <= 0 || paren >= 0)) return 0;
+	    if ((int)paren < length_a[ar - 'A']) {
+	     v[cv++] = table_a[ar - 'A'][(int)paren];
+	     if (prefix == '-') v[cv - 1] = -v[cv - 1];
+	    }
+	   }
+	
+  
+ // 수학함수인 경우
+	   else {
+	    for (j = 0; j < NumofFunc; ++j)
+	     if (whereis(expr + i, fname[j]) == 0 && expr[strlen(fname[j]) + i] == '(') {
+	      i += strlen(fname[j]);
+	      paren = parenthesis(expr, &i);
+	      if (!(paren <= 0 || paren >= 0)) return 0;
+	      v[cv++] = funcArit(j, paren);
+	      if (prefix == '-') v[cv - 1] = -v[cv - 1];
+	      break;
+	     }
+	   }
+	  }
+	 }
+	
+
+
+
+

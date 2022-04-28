@@ -22,4 +22,3 @@ double  calculation(char*);         // 수식 계산
 void    assignment(char*);          // 대입 연산자 계산
 void    aCommand(char*);            // 배열 변수가 있는 수식 계산
 double  funcArit(int, double);      // 수학 함수 호출
- 

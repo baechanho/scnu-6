@@ -1,0 +1,34 @@
+
+double funcArit(int FuncIndex, double x)
+{
+ // 수학 함수를 호출한다
+ // 전역 변수로 선언된 fname배열에
+ // 사용 가능한 수학 함수를 대문자로 정의한 후
+ // 아래의 switch-case문에 입력하면 된다
+ switch (FuncIndex) {
+ case 0: return acos(x);
+ case 1: return asin(x);
+ case 2: return atan(x);
+
+ case 3: return cos(x);
+ case 4: return sin(x);
+ case 5: return tan(x);
+
+ case 6: return cosh(x);
+ case 7: return sinh(x);
+ case 8: return tanh(x);
+
+  // case 9 : return acosh(x);
+  // case 10 : return asinh(x);
+  // case 11 : return atanh(x);
+
+ case 12: return exp(x);
+ case 13: return log(x);
+ case 14: return log10(x);
+
+ case 15: return sqrt(x);
+ case 16: return fabs(x);
+ case 17: return floor(x);
+ default: return 0;
+ }
+}

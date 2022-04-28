@@ -1,0 +1,60 @@
+// 일반변수
+    // '=' 다음 부분을 Calculation 한 후 table_v에 저장한다
+    if (command[0] <= 'Z' && command[0] >= 'A' && command[1] == '=') {
+        result[0] = calculation(command + 2);
+        if (result[0] <= 0 || result[0] >= 0) {
+            flag_v[command[0] - 'A'] = 1;
+            table_v[command[0] - 'A'] = result[0];
+            return;
+        }
+        else {
+            printf("= Undefined Symbol\n");
+            return;
+        }
+    }
+
+    // 양쪽다 아닌경우
+    printf("= Undefined Symbol\n");
+    return;
+}
+
+void aCommand(char* command)
+{
+    char* afname[4] = {
+     "ADD", "MUL", "AVG", "STD" };
+    int i, j, k;
+    int co = 0, ca = 0;
+    char o[100], a[100];
+    double result[20], r2[20];
+
+    for (i = 0; i < 4; ++i) {
+        if (whereis(command, afname[i]) == 0)
+            break;
+    }
+
+    result[1] = 1;
+    // 명령이 afname 에 서술된 함수를 포함하고 있으면
+    // 총합, 총곱, 평균, 표준편차를 구한다
+    // result[0]는 총합, result[1]는 총곱,
+    // result[2]는 평균, result[3]은 표준편차가 입력된다
+    if (i < 4) {
+        for (j = 0; j < length_a[command[4] - 'A']; ++j) {
+            result[0] += table_a[command[4] - 'A'][j];
+            result[1] *= table_a[command[4] - 'A'][j];
+            result[3] += (table_a[command[4] - 'A'][j] * table_a[command[4] - 'A'][j]);
+        }
+
+        result[2] = result[0] / length_a[command[4] - 'A'];
+        result[3] /= length_a[command[4] - 'A'];
+        result[3] = result[3] - (result[0] * result[0]);
+
+        printf("= %f\n", result[i]);
+    }
+
+    // 위의 경우가 아니면 배열의 사칙연산을 수행한다
+    // result는 전반적인 연산을 위한 배열이고,
+    // r2는 부분적인 연산을 위한 배열인다.
+    // 이 말은, result로 계속 누산(누적 계산)을 하다가
+    // 연산자의 우선순위가 바뀌는 경우, (이번 연산은 +-인데 다음 연산은 */인 경우)
+    // 우선순위가 뒤집혀져 있는 동안 r2로 누산을 하여
+    // result에 r2를 누산하여 준다

@@ -1,0 +1,63 @@
+
+ // 정상적인 수식의 경우 o배열의 길이가 c배열의 길이보다 1개 더 많다
+ if (co + 1 != cv) return 0;
+
+ // 먼저 o배열에서 *나 /를 찾아서 계산하고 계산된 부분에는 d를 입력한다
+ // * d : Don't Mind
+ // 계산은 v배열의 i와 v배열의 i+1을 o배열에 있는 연산자로 계산하고
+ // 계산된 결과를 v배열의 i+1에 저장한다
+ for (i = 0; i < co; ++i) {
+  if (is_in("+-", o[i])) continue;
+
+  if (o[i] == '*') v[i + 1] = v[i] * v[i + 1];
+  if (o[i] == '/') v[i + 1] = v[i] / v[i + 1];
+
+  o[i] = 'd';
+ }
+
+ // o배열에는 +와 -만 남아있으므로 +와 -를 계산하는데
+ // v[i]와 i+1 부터 o배열의 d가 아닌 j를 구해서
+ // o배열에 있는 연산자로 계산하고 v[j]에 저장한다
+ for (i = 0; i < co; ++i) {
+  if (o[i] == 'd') continue;
+
+  for (j = i + 1; o[j] == 'd' && j < co; ++j);
+
+  if (o[i] == '+') v[j] = v[i] + v[j];
+  if (o[i] == '-') v[j] = v[i] - v[j];
+ }
+
+ // v배열의 마지막 원소(계산결과)를 리턴한다
+ return v[co];
+}
+
+void assignment(char *command)
+{
+ int i, j, cnt = 0;
+ double result[20];
+
+ // 배열변수
+ // ',' 를 '\0'로 바꾸고 Calculation 한다음 table_a에 저장한다
+ if ((command[0] <= 'Z' && command[0] >= 'A') && command[1] == command[0] && command[2] == '=') {
+  j = 3;
+  for (i = 3; command[i] != '\0'; ++i)
+   if (command[i] == ',') {
+    command[i] = '\0';
+    result[cnt] = calculation(command + j);
+    if (!(result[cnt] <= 0 || result[cnt] >= 0)) {
+     printf("= Undefined Symbol\n");
+     return;
+    }
+    ++cnt;
+    j = i + 1;
+   }
+  result[cnt] = calculation(command + j);
+  if (!(result[cnt] <= 0 || result[cnt] >= 0)) {
+   printf("= Undefined Symbol\n");
+   return;
+  }
+  length_a[command[0] - 'A'] = ++cnt;
+  for (i = 0; i < cnt; ++i)
+   table_a[command[0] - 'A'][i] = result[i];
+  return;
+ }

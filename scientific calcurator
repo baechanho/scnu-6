@@ -1,0 +1,78 @@
+ else
+ {
+  for (i = 0; command[i] != '\0'; ++i)
+   if (command[i] <= 'Z' && command[i] >= 'A') {
+    a[ca++] = command[i] - 'A';
+    ++i;
+   }
+   else if (is_in("+-*/", command[i]))
+    o[co++] = command[i];
+
+  // 다음 ERROR들을 처리한다
+
+  // 연산식이 잘못된 경우
+  // (배열변수의 갯수와 연산자의 갯수가 않맞는경우)
+  if (!(ca == co + 1)) {
+   printf("= Undefined Symbol\n");
+   return;
+  }
+
+  // 배열 변수들 간에 갯수가 안맞는 경우
+  // (AA + BB 에서 AA 는 3개, BB는 4개인 경우)
+  for (i = 1; i < co; ++i)
+   if (length_a[a[i]] != length_a[a[i - 1]]) {
+    printf("= Undefined Symbol\n");
+    return;
+   }
+
+  // 선언되지 않은 배열변수를 사용한 경우
+  for (i = 0; i < co; ++i)
+   if (length_a[a[i]] == 0) {
+    printf("= Undefined Symbol\n");
+    return;
+   }
+
+  for (k = 0; k < length_a[a[0]]; ++k)
+   result[k] = table_a[a[0]][k];
+
+  for (i = 0; i < co; ++i) {
+   if (is_in("+-", o[i])) {
+    if (is_in("*/", o[i + 1])) {
+     for (k = 0; k < length_a[a[0]]; ++k)
+      r2[k] = o[i + 1];
+
+     for (j = i + 1; is_in("*/", o[j]); ++j)
+      if (o[j] == '*')
+       r2[k] *= table_a[a[j + 1]][k];
+      else
+       r2[k] /= table_a[a[j + 1]][k];
+
+     for (k = 0; k < length_a[a[0]]; ++k)
+      if (o[i] == '+')
+       result[k] += r2[k];
+      else
+       result[k] -= r2[k];
+     i = j - 1;
+    }
+    else
+     for (k = 0; k < length_a[a[0]]; ++k)
+      if (o[i] == '+')
+       result[k] += table_a[a[i + 1]][k];
+      else
+       result[k] -= table_a[a[i + 1]][k];
+   }
+   else  {
+    for (k = 0; k < length_a[a[0]]; ++k)
+     if (o[i] == '*')
+      result[k] *= table_a[a[i + 1]][k];
+     else
+      result[k] /= table_a[a[i + 1]][k];
+   }
+  }
+  printf("= ");
+  for (k = 0; k < length_a[a[0]]; ++k)
+   printf("%f ", result[k]);
+  printf("\n");
+ }
+
+}

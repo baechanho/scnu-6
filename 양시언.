@@ -1,0 +1,77 @@
+// load 로 시작하는 명령
+  if (whereis(buffer, "load ") == 0) {
+   fp = fopen(buffer + 5, "r");
+
+   for (i = 0; i < 26; ++i)
+    fscanf(fp, "%d", &flag_v[i]);
+   for (i = 0; i < 26; ++i)
+    fscanf(fp, "%d", &length_a[i]);
+
+   for (i = 0; i < 26; ++i)
+    if (flag_v[i])
+     fscanf(fp, "%lf", &table_v[i]);
+
+   for (i = 0; i < 26; ++i)
+    for (j = 0; j < length_a[i]; ++j)
+     fscanf(fp, "%lf", &table_a[i][j]);
+
+   fclose(fp);
+   continue;
+  }
+
+  // 공백 문자 제거
+  for (i = 0; buffer[i] != '\0'; ++i)
+   while (buffer[i] == ' ')
+    for (cnt = i; buffer[cnt] != '\0'; ++cnt)
+     buffer[cnt] = buffer[cnt + 1];
+
+  // 소문자를 대문자로 교체
+  for (i = 0; buffer[i] != '\0'; ++i)
+   if (buffer[i] <= 'z' && buffer[i] >= 'a')
+    buffer[i] += 'A' - 'a';
+
+  // end 명령일 경우 프로그램을 종료
+  if (!strcmp(buffer, "END")) break;
+
+  // 명령어 Parsing
+  parsing(buffer);
+ }
+}
+
+void parsing(char *command)
+{
+ int i;
+ double result;
+
+ // 명령어에 '=' 이 있으면 대입 명령으로 간주하여
+ // assignment로 명령어를 넘김
+ //
+ if (is_in(command, '=')) {
+  assignment(command);
+  return;
+ }
+
+ // 영문자가 2개 반복되어 출현하고 다음 문자가 '(' 이 아닌경우
+ // 배열 변수로 간주하여 aCommand(Array Command)로 명령어를 넘김
+ for (i = 0; command[i + 1] != '\0'; ++i)
+  if ((command[i] <= 'Z' && command[i] >= 'A') && command[i + 1] == command[i] && command[i + 2] != '(') {
+   aCommand(command);
+   return;
+  }
+
+ // 위에 나온 두가지 조건이 아닌경우
+ // 일반 변수를 포함하는 수식으로 간주하여 calculation 으로 넘겨서 계산
+ result = calculation(command);
+
+ // 계산된 값이 NAN(Not a Number)인 경우 에러를 출력한다
+ // (NAN은 NAN <= 0 || NAN >= 0 을 만족하지 않는다)
+ // NAN이 아니면 계산된 값을 출력한다
+ if (!(result <= 0 || result >= 0)) printf("= Undefined Symbol\n");
+ else printf("= %f\n", result);
+}
+
+double parenthesis(char *expr, int *i)
+{
+ int cntb = 0, cntp = 1;
+ char buffer[127];
+ double paren;
